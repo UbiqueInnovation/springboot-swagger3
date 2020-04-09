@@ -314,6 +314,7 @@ public class SwaggerGenerator extends AbstractMojo {
             //the controller method has a dictionar of httpreturncode:text
             DocumentationWrapper docWrapper = null;
             Map<String, String> returnCodeToDescription = new LinkedHashMap<String,String>();
+            
             if(controllerMethod.isAnnotationPresent(documentation)) {
                 docWrapper = new DocumentationWrapper(controllerMethod.getAnnotation(documentation));
                 if(docWrapper.undocumented()) {
@@ -326,8 +327,9 @@ public class SwaggerGenerator extends AbstractMojo {
                         returnCodeToDescription.put(codeToDesc[0].trim(), codeToDesc[1].trim());
                     }
                 }
+            } else {
+                getLog().warn("No Documentation annotation found");
             }
-           
             // Add baseUrl to the path
             String path = wrapper.value()[0];
             getLog().warn(path);
