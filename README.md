@@ -2,7 +2,7 @@
 Generate OpenAPI 3 YAML out of SpringBoot controllers
 
 ## Usage
-Add the dependencies to your pom.xml and then add the following to plugins section:
+Add the dependencies to your pom.xml and then add the following to the plugins section:
 ```
 <plugin>
                 <groupId>ch.ubique.openapi</groupId>
