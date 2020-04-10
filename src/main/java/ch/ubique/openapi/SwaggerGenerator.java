@@ -424,6 +424,7 @@ public class SwaggerGenerator extends AbstractMojo {
         if(obj.getAnnotation(documentation) != null) {
             DocumentationWrapper docWrapper = new DocumentationWrapper(obj.getAnnotation(documentation));
             param.put("description", docWrapper.description());
+            param.put("example", docWrapper.example());
         }
         else {
             param.put("description", wrap.name());
@@ -468,6 +469,7 @@ public class SwaggerGenerator extends AbstractMojo {
         if(obj.getAnnotation(documentation) != null) {
             DocumentationWrapper docWrapper = new DocumentationWrapper(obj.getAnnotation(documentation));
             param.put("description", docWrapper.description());
+            param.put("example", docWrapper.example());
         }
         else {
             param.put("description", wrap.name());
@@ -511,6 +513,7 @@ public class SwaggerGenerator extends AbstractMojo {
         if(obj.getAnnotation(documentation) != null) {
             DocumentationWrapper docWrapper = new DocumentationWrapper(obj.getAnnotation(documentation));
             param.put("description", docWrapper.description());
+            param.put("example", docWrapper.example());
         }
         else {
             param.put("description", wrap.name());
