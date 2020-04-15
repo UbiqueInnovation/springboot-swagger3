@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import javax.lang.model.type.NullType;
+
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -668,6 +670,7 @@ public class SwaggerGenerator extends AbstractMojo {
     private Class<? extends Annotation> requestBody;
     private Class<? extends Annotation> jsonIgnore;
     private Class<? extends Annotation> notNull;
+    private Class<? extends Annotation> jsonRawValue;
     private Class<? extends Annotation> pathVariable;
     private Class<? extends Annotation> documentation;
 
@@ -723,6 +726,7 @@ public class SwaggerGenerator extends AbstractMojo {
             requestBody = (Class<? extends Annotation>) loader
                     .loadClass("org.springframework.web.bind.annotation.RequestBody");
             jsonIgnore = (Class<? extends Annotation>)loader.loadClass("com.fasterxml.jackson.annotation.JsonIgnore");
+            jsonRawValue = (Class<? extends Annotation>)loader.loadClass("com.fasterxml.jackson.annotation.JsonRawValue");
             notNull = (Class<? extends Annotation>)loader.loadClass("javax.validation.constraints.NotNull");
             pathVariable = (Class<? extends Annotation>)loader.loadClass("org.springframework.web.bind.annotation.PathVariable");
             documentation = (Class<? extends Annotation>)loader.loadClass("ch.ubique.openapi.docannotations.Documentation");
@@ -849,6 +853,7 @@ public class SwaggerGenerator extends AbstractMojo {
         List<String> required = new ArrayList<String>();
         
         for(java.lang.reflect.Field field : getAllFields(objectClass)) {
+            Class<?> type = field.getType();
             //Ignore @JsonIgnore fields
             if(field.isAnnotationPresent(jsonIgnore)) {
                 getLog().warn("jsonIgnore");
@@ -868,24 +873,26 @@ public class SwaggerGenerator extends AbstractMojo {
                else if(docWrapper.undocumented() && field.isAnnotationPresent(notNull)){
                    getLog().warn("Got undocumented field, which is mandatory! The description of this field will be empty.");
                }
-
+               if(docWrapper.serializedClass() != NullType.class && field.isAnnotationPresent(jsonRawValue)) {
+                   type = docWrapper.serializedClass();
+               }
             }
             //if a field is annotated as NotNull it is mandatory
             if(field.isAnnotationPresent(notNull)) {
                 required.add(field.getName());
             }
            
-            if(isPrimitive(field.getType())) {
+            if(isPrimitive(type)) {
                 //we have a primitive write directyl to map
                 Map<String, Object> innerDef = new LinkedHashMap<String,Object>();
                 currentObject.put(field.getName(),innerDef);
-                mapPrimitiveTypeAndFormat(innerDef, field.getType().getSimpleName());
+                mapPrimitiveTypeAndFormat(innerDef, type.getSimpleName());
                 if(docWrapper != null) {
                     innerDef.put("description", docWrapper.description());
                     innerDef.put("example", docWrapper.example());
                 }                
             }
-            else if(Collection.class.isAssignableFrom(field.getType()) || field.getType().isArray())  {
+            else if(Collection.class.isAssignableFrom(type) || type.isArray())  {
                 //we have a list
                
                 Map<String, Object> arraydef = new LinkedHashMap<String,Object>();
@@ -939,7 +946,7 @@ public class SwaggerGenerator extends AbstractMojo {
 
 
             } 
-            else if(Map.class.isAssignableFrom(field.getType())){
+            else if(Map.class.isAssignableFrom(type)){
                 Log logger = getLog();
                // ParameterizedType innerType = (ParameterizedType) field.getGenericType();
                // Class<?>[] innerTypeClass = (Class<?>[]) innerType.getActualTypeArguments();
@@ -1008,10 +1015,10 @@ public class SwaggerGenerator extends AbstractMojo {
             }
            
             else {
-               if(isPrimitive(field.getType())) {
+               if(isPrimitive(type)) {
                    LinkedHashMap<String, Object> objDefinition = new LinkedHashMap<String,Object>();
                 currentObject.put(field.getName(),  objDefinition);
-                objDefinition.put("type", javaToSwaggerLinkedHashMap.get(field.getType().getSimpleName()));
+                objDefinition.put("type", javaToSwaggerLinkedHashMap.get(type.getSimpleName()));
                 if(docWrapper != null) {
                     objDefinition.put("description", docWrapper.description());
                     objDefinition.put("example", docWrapper.example());
@@ -1020,15 +1027,15 @@ public class SwaggerGenerator extends AbstractMojo {
                }
                LinkedHashMap<String, Object> objDefinition = new LinkedHashMap<String,Object>();
                 currentObject.put(field.getName(),objDefinition );
-                objDefinition.put("$ref", "#/components/schemas/" + field.getType().getCanonicalName()+"");
+                objDefinition.put("$ref", "#/components/schemas/" + type.getCanonicalName()+"");
                 if(docWrapper != null) {
                     objDefinition.put("description", docWrapper.description());
                     objDefinition.put("example", docWrapper.example());
                 } 
                 //only add types which are not primitives AND from us (prevents weird private fields from trying to be serialized)
                 
-                if(!registeredTypes.contains(field.getType().getSimpleName()) && ownedType) {
-                    Collection<Map<String,Object>> innerModDef = getModelDefinition(field.getName(),field.getType());
+                if(!registeredTypes.contains(type.getSimpleName()) && ownedType) {
+                    Collection<Map<String,Object>> innerModDef = getModelDefinition(field.getName(),type);
                     //add all additional found definitions
                     for(Map<String, Object>  defi : innerModDef) {
                         definitions.add(defi);
@@ -1452,5 +1459,8 @@ final class DocumentationWrapper extends MethodTranslator implements Documentati
     }
     public boolean undocumented() {
         return invokeMethod("undocumented");
+    }
+    public Class<?> serializedClass(){
+        return invokeMethod("serializedClass");
     }
 }
