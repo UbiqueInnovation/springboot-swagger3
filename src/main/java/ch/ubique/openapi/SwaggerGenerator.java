@@ -40,6 +40,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,6 +63,8 @@ public class SwaggerGenerator extends AbstractMojo {
     MavenProject project;
     @Parameter(defaultValue = "ch.ubique.viadi", required = true)
     String[] basePackages;
+    @Parameter(defaultValue = "", required = false)
+    String[] blackListedPackages;
     @Parameter(required = true)
     String[] controllers;
     @Parameter(defaultValue = "generated/swagger/")
@@ -308,11 +314,12 @@ public class SwaggerGenerator extends AbstractMojo {
        // theMethods.sort(c);
         for (Method controllerMethod : getDeclaredMethodsInOrder(controller)) {
             // skip all methods which do not have a requestMapping annotation
-            if (!controllerMethod.isAnnotationPresent(requestMapping))
+            if (!controllerMethod.isAnnotationPresent(requestMapping) && !controllerMethod.isAnnotationPresent(getMapping) && !controllerMethod.isAnnotationPresent(postMapping))
                 continue;
             
             // Get a wrapper arround the Annotation
-            RequestMappingWrapper wrapper = new RequestMappingWrapper(controllerMethod.getAnnotation(requestMapping));
+
+            RequestMappingWrapper wrapper = new RequestMappingWrapper(getRequestMappingForMethod(controllerMethod));
             //the controller method has a dictionar of httpreturncode:text
             DocumentationWrapper docWrapper = null;
             Map<String, String> returnCodeToDescription = new LinkedHashMap<String,String>();
@@ -342,8 +349,14 @@ public class SwaggerGenerator extends AbstractMojo {
             }
 
             // We have a request so create request object
-            Map<String, Object> request = new LinkedHashMap<String, Object>();
-            paths.put(path, request);
+            Map<String, Object> request = null;
+            if(paths.containsKey(path)) {
+                request = (LinkedHashMap<String,Object>)paths.get(path);
+            } else {
+                request = new LinkedHashMap<String,Object>();
+                paths.put(path, request);
+            }
+            
 
             // get the generic Return Type (e.g ResponseBody<T> List<T> Map<K,V> and so on)
             Type returnType = controllerMethod.getGenericReturnType();
@@ -351,12 +364,18 @@ public class SwaggerGenerator extends AbstractMojo {
             // The request method, default is get
 
             String theMethod = "get";
+            getLog().error(wrapper.annotationType().toString());
             if (wrapper.method().length > 0) {
                 theMethod = wrapper.method()[0].toString().toLowerCase();
             }
             
-            Map<String, Object> method = getRequestMethod(controllerMethod, wrapper);
-            request.put(theMethod, method);
+            Map<String, Object> method = null;//getRequestMethod(controllerMethod, wrapper);
+            if(request.containsKey(theMethod)) {
+                method = (LinkedHashMap<String,Object>)request.get(theMethod);
+            } else {
+                method = getRequestMethod(controllerMethod, wrapper);
+                request.put(theMethod, method);
+            }
 
             // 0 means the object is directly the return value; 1 means one list, 2 two ....
             int nestedReturnValueLayer = 0;
@@ -370,13 +389,23 @@ public class SwaggerGenerator extends AbstractMojo {
             nestedReturnValueLayer = innerStructure.getValue1();
 
             //Start setting up response
-            Map<String, Object> responses = new LinkedHashMap<String, Object>();
-            method.put("responses", responses);
+            Map<String, Object> responses = null;
+            if(method.containsKey("responses")) {
+                responses = (LinkedHashMap<String, Object>)method.get("responses");
+            } else {
+                responses = new LinkedHashMap<String, Object>();
+                method.put("responses", responses);
+            }
             if(returnCodeToDescription.isEmpty()) {
-                Map<String, Object> statusCodeMap = new LinkedHashMap<String, Object>();
+                Map<String, Object> statusCodeMap = null;//new LinkedHashMap<String, Object>();
                 String statusCode = "200";
-                responses.put("200", statusCodeMap);
-                if(returnCodeToDescription.containsKey(statusCode)) {
+                if(responses.containsKey(statusCode)) {
+                    statusCodeMap = (LinkedHashMap<String, Object>)responses.get(statusCode);
+                } else {
+                    statusCodeMap = new LinkedHashMap<String, Object>();
+                    responses.put(statusCode, statusCodeMap);
+                }
+                if(returnCodeToDescription.containsKey(statusCode) && !statusCodeMap.containsKey("description")) {
                     statusCodeMap.put("description",returnCodeToDescription.get(statusCode));
                 }
                 else {
@@ -386,7 +415,12 @@ public class SwaggerGenerator extends AbstractMojo {
                 // only if response type is not void do we need a contetnt
                 if(statusCode.contains("200") && actualClass != Void.class && !actualClass.getSimpleName().toLowerCase().equals("void")) 
                 {
-                    statusCodeMap.put("content", getResponseContent(actualClass, wrapper, nestedReturnValueLayer));
+                    if(statusCodeMap.containsKey("content")) {
+                        Map<String, Object> innerMap = (LinkedHashMap<String, Object>)statusCodeMap.get("content");
+                        innerMap.putAll(getResponseContent(actualClass, wrapper, nestedReturnValueLayer));
+                    } else {
+                        statusCodeMap.put("content", getResponseContent(actualClass, wrapper, nestedReturnValueLayer));
+                    }
                 }
             }
             for(String statusCode : returnCodeToDescription.keySet()) {
@@ -653,11 +687,55 @@ public class SwaggerGenerator extends AbstractMojo {
         }
     }
 
-    private Object getRequestMapping(Class<?> controllerClass) {
-        Object obj = controllerClass.getAnnotation(requestMapping);
-        return obj;
+    private MappingWrapper getRequestMapping(Class<?> controllerClass) {
+        Log logger = getLog();
+        Object obj = null;
+        RequestMethod method = RequestMethod.GET;
+        if(controllerClass.isAnnotationPresent(requestMapping)) {
+            obj = controllerClass.getAnnotation(requestMapping);
+            try {
+                method = Enum.valueOf(RequestMethod.class,((Object[])obj.getClass().getMethod("method", null).invoke(obj, null))[0].toString());
+            }
+            catch(Exception ex) {
+                method = RequestMethod.GET;
+            }
+        }
+        if(controllerClass.isAnnotationPresent(getMapping)){
+            obj = controllerClass.getAnnotation(getMapping);
+            method = RequestMethod.GET;
+        }
+        if(controllerClass.isAnnotationPresent(postMapping)){
+            obj = controllerClass.getAnnotation(postMapping);
+            method = RequestMethod.POST;
+        }
+        logger.error(obj.toString());
+        return new MappingWrapper(obj, method);
     }
 
+    private MappingWrapper getRequestMappingForMethod(Method controllerClass) {
+        Log logger = getLog();
+        Object obj = null;
+        RequestMethod method = RequestMethod.GET;
+        if(controllerClass.isAnnotationPresent(requestMapping)) {
+            obj = controllerClass.getAnnotation(requestMapping);
+            try {
+                method = Enum.valueOf(RequestMethod.class,((Object[])obj.getClass().getMethod("method", null).invoke(obj, null))[0].toString());
+            }
+            catch(Exception ex) {
+                method = RequestMethod.GET;
+            }
+        }
+        if(controllerClass.isAnnotationPresent(getMapping)){
+            obj = controllerClass.getAnnotation(getMapping);
+            method = RequestMethod.GET;
+        }
+        if(controllerClass.isAnnotationPresent(postMapping)){
+            obj = controllerClass.getAnnotation(postMapping);
+            method = RequestMethod.POST;
+        }
+        logger.error(obj.toString());
+        return new MappingWrapper(obj, method);
+    }
     private Controller getControllerMapping(Class<?> controllerClass) {
         return (Controller) controllerClass.getAnnotation(controller);
     }
@@ -673,6 +751,8 @@ public class SwaggerGenerator extends AbstractMojo {
     private Class<? extends Annotation> jsonRawValue;
     private Class<? extends Annotation> pathVariable;
     private Class<? extends Annotation> documentation;
+    public static Class<? extends Annotation> getMapping;
+    public static Class<? extends Annotation> postMapping;
 
     private Class<?> loadClass(String name) {
         try {
@@ -717,6 +797,10 @@ public class SwaggerGenerator extends AbstractMojo {
             controller = (Class<? extends Annotation>) loader.loadClass("org.springframework.stereotype.Controller");
             requestMapping = (Class<? extends Annotation>) loader
                     .loadClass("org.springframework.web.bind.annotation.RequestMapping");
+            getMapping = (Class<? extends Annotation>) loader
+            .loadClass("org.springframework.web.bind.annotation.GetMapping");
+            postMapping = (Class<? extends Annotation>) loader
+            .loadClass("org.springframework.web.bind.annotation.PostMapping");
             requestParam = (Class<? extends Annotation>) loader
                     .loadClass("org.springframework.web.bind.annotation.RequestParam");
             responseBody = (Class<? extends Annotation>) loader
@@ -823,10 +907,22 @@ public class SwaggerGenerator extends AbstractMojo {
         }
         //if we don't have a primitive and it  is not from our package, we probably have an unserializable type
         boolean ownedType = false;
-        for(String basePackage : basePackages) {
-            if(objectClass.getCanonicalName().contains(basePackage)) {
-                ownedType = true;
-                break;
+        boolean blackListed = false;
+        if(blackListedPackages != null) {
+            for(String basePackage : blackListedPackages) {
+                if(objectClass.getCanonicalName().contains(basePackage)) {
+                    ownedType = false;
+                    blackListed = true;
+                    break;
+                }
+            }
+        }
+        if(!blackListed) {
+            for(String basePackage : basePackages) {
+                if(objectClass.getCanonicalName().contains(basePackage)) {
+                    ownedType = true;
+                    break;
+                }
             }
         }
         if(!ownedType && !isPrimitive(objectClass)) {
@@ -1203,14 +1299,294 @@ public static Method[] getDeclaredMethodsInOrder(Class clazz) {
       
 }
 
+final class GetMappingWrapper implements GetMapping {
+    Object obj;
+
+    public GetMappingWrapper(Object obj) {
+        this.obj = obj;
+    }
+
+    @Override
+    public Class<? extends Annotation> annotationType() {
+        return (Class<? extends Annotation>) obj.getClass();
+    }
+
+    @Override
+    public String name() {
+        return invokeMethod("name");
+    }
+
+    @Override
+    public String[] value() {
+        return invokeMethod("value");
+    }
+
+    @Override
+    public String[] path() {
+        return invokeMethod("path");
+    }
+
+    @Override
+    public String[] params() {
+        return invokeMethod("params");
+    }
+
+    @Override
+    public String[] headers() {
+        return invokeMethod("headers");
+    }
+
+    @Override
+    public String[] consumes() {
+        return invokeMethod("consumes");
+    }
+
+    @Override
+    public String[] produces() {
+        return invokeMethod("produces");
+    }
+    private <T> T  invokeMethod(String function) {
+        try {
+            return (T) obj.getClass().getMethod(function, null).invoke(this.obj, null);
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+
+
+final class PostMappingWrapper implements PostMapping {
+    Object obj;
+
+    public PostMappingWrapper(Object obj) {
+        this.obj = obj;
+    }
+
+    @Override
+    public Class<? extends Annotation> annotationType() {
+        return (Class<? extends Annotation>) obj.getClass();
+    }
+
+    @Override
+    public String name() {
+        return invokeMethod("name");
+    }
+
+    @Override
+    public String[] value() {
+        return invokeMethod("value");
+    }
+
+    @Override
+    public String[] path() {
+        return invokeMethod("path");
+    }
+
+    @Override
+    public String[] params() {
+        return invokeMethod("params");
+    }
+
+    @Override
+    public String[] headers() {
+        return invokeMethod("headers");
+    }
+
+    @Override
+    public String[] consumes() {
+        return invokeMethod("consumes");
+    }
+
+    @Override
+    public String[] produces() {
+        return invokeMethod("produces");
+    }
+    private <T> T  invokeMethod(String function) {
+        try {
+            return (T) obj.getClass().getMethod(function, null).invoke(this.obj, null);
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+
+
+final class PutMappingWrapper implements PutMapping {
+    Object obj;
+
+    public PutMappingWrapper(Object obj) {
+        this.obj = obj;
+    }
+
+    @Override
+    public Class<? extends Annotation> annotationType() {
+        return (Class<? extends Annotation>) obj.getClass();
+    }
+
+    @Override
+    public String name() {
+        return invokeMethod("name");
+    }
+
+    @Override
+    public String[] value() {
+        return invokeMethod("value");
+    }
+
+    @Override
+    public String[] path() {
+        return invokeMethod("path");
+    }
+
+    @Override
+    public String[] params() {
+        return invokeMethod("params");
+    }
+
+    @Override
+    public String[] headers() {
+        return invokeMethod("headers");
+    }
+
+    @Override
+    public String[] consumes() {
+        return invokeMethod("consumes");
+    }
+
+    @Override
+    public String[] produces() {
+        return invokeMethod("produces");
+    }
+    private <T> T  invokeMethod(String function) {
+        try {
+            return (T) obj.getClass().getMethod(function, null).invoke(this.obj, null);
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
+
+
+final class DeleteMappingWrapper implements DeleteMapping {
+    Object obj;
+
+    public DeleteMappingWrapper(Object obj) {
+        this.obj = obj;
+    }
+
+    @Override
+    public Class<? extends Annotation> annotationType() {
+        return (Class<? extends Annotation>) obj.getClass();
+    }
+
+    @Override
+    public String name() {
+        return invokeMethod("name");
+    }
+
+    @Override
+    public String[] value() {
+        return invokeMethod("value");
+    }
+
+    @Override
+    public String[] path() {
+        return invokeMethod("path");
+    }
+
+    @Override
+    public String[] params() {
+        return invokeMethod("params");
+    }
+
+    @Override
+    public String[] headers() {
+        return invokeMethod("headers");
+    }
+
+    @Override
+    public String[] consumes() {
+        return invokeMethod("consumes");
+    }
+
+    @Override
+    public String[] produces() {
+        return invokeMethod("produces");
+    }
+    private <T> T  invokeMethod(String function) {
+        try {
+            return (T) obj.getClass().getMethod(function, null).invoke(this.obj, null);
+        } catch (IllegalAccessException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IllegalArgumentException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        return null;
+    }
+}
 
 //Helper classes to proxy objects from different classLoaders
 final class RequestMappingWrapper implements RequestMapping {
 
     Object obj;
+    RequestMethod method;
 
-    public RequestMappingWrapper(Object obj) {
-        this.obj = obj;
+    public RequestMappingWrapper(MappingWrapper wrapper) {
+        this.obj = wrapper.getObj();
+        this.method = wrapper.getMethod();
     }
 
     public Class<? extends Annotation> annotationType() {
@@ -1248,33 +1624,16 @@ final class RequestMappingWrapper implements RequestMapping {
     }
 
     public RequestMethod[] method() {
-        try {
+        
             ArrayList<RequestMethod> test = new ArrayList<RequestMethod>();
-            
-            Object[] returnValue =  (Object[])obj.getClass().getMethod("method", null).invoke(this.obj, null);
-            
-            for(Object obj : returnValue) {
-                test.add(Enum.valueOf(RequestMethod.class, obj.toString()));
-            }
-            
+          
+            // Object[] returnValue =  (Object[])obj.getClass().getMethod("method", null).invoke(this.obj, null);
+        
+            // for(Object obj : returnValue) {
+            //     test.add(Enum.valueOf(RequestMethod.class, obj.toString()));
+            // }
+            test.add(method);
             return ((List<RequestMethod>)test).toArray(new RequestMethod[0]);
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return null;
     }
 
     public String[] params() {
@@ -1462,5 +1821,20 @@ final class DocumentationWrapper extends MethodTranslator implements Documentati
     }
     public Class<?> serializedClass(){
         return invokeMethod("serializedClass");
+    }
+}
+
+final class MappingWrapper {
+    Object obj;
+    RequestMethod method;
+    public MappingWrapper(Object obj, RequestMethod method) {
+        this.obj = obj;
+        this.method = method;
+    }
+    public Object getObj() {
+        return obj;
+    }
+    public RequestMethod getMethod() {
+        return method;
     }
 }
