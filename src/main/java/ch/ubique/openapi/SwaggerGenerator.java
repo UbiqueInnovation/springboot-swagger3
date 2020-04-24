@@ -813,7 +813,12 @@ public class SwaggerGenerator extends AbstractMojo {
             jsonRawValue = (Class<? extends Annotation>)loader.loadClass("com.fasterxml.jackson.annotation.JsonRawValue");
             notNull = (Class<? extends Annotation>)loader.loadClass("javax.validation.constraints.NotNull");
             pathVariable = (Class<? extends Annotation>)loader.loadClass("org.springframework.web.bind.annotation.PathVariable");
-            documentation = (Class<? extends Annotation>)loader.loadClass("ch.ubique.openapi.docannotations.Documentation");
+            try {
+                documentation = (Class<? extends Annotation>)loader.loadClass("ch.ubique.openapi.docannotations.Documentation");
+            }
+            catch(ClassNotFoundException ex) {
+                documentation = Documentation.class;
+            }
             for (String classString : controllers) {
                 // check its metadata to see if it's what you want
                 Class<?> myclass = loader.loadClass(classString);
