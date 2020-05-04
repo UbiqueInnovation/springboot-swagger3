@@ -65,6 +65,8 @@ public class SwaggerGenerator extends AbstractMojo {
     String[] basePackages;
     @Parameter(defaultValue = "", required = false)
     String[] blackListedPackages;
+    @Parameter(defaultValue = "", required = false)
+    String[] ignoredTypes;
     @Parameter(required = true)
     String[] controllers;
     @Parameter(defaultValue = "generated/swagger/")
@@ -79,6 +81,7 @@ public class SwaggerGenerator extends AbstractMojo {
     String description;
     @Parameter(defaultValue = "SwaggerAPI")
     String title;
+
 
     private Map<String, Object> getInfoHeader() {
         Map<String, Object> info = new LinkedHashMap<String, Object>();
@@ -964,6 +967,10 @@ public class SwaggerGenerator extends AbstractMojo {
                 getLog().warn("static fields are ignored");
                 continue;
             }
+            if(!isPrimitive(type) && isBlackListed(type)) {
+                getLog().warn("black listed type");
+                continue;
+            }
             DocumentationWrapper docWrapper = null;
             if(field.isAnnotationPresent(documentation)) {
                docWrapper = new DocumentationWrapper(field.getAnnotation(documentation));
@@ -1158,6 +1165,19 @@ public class SwaggerGenerator extends AbstractMojo {
 
     private boolean isPrimitive(Class<?> field) {
         return javaToSwaggerLinkedHashMap.containsKey(field.getSimpleName());
+    }
+    private boolean isBlackListed(Class<?> field) {
+        for(String blackListed : blackListedPackages) {
+            if (field.getCanonicalName().contains(blackListed)) {
+                return true;
+            }
+        }
+        for(String ignoredType : ignoredTypes) {
+            if(field.getCanonicalName().equals(ignoredType)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void mapPrimitiveTypeAndFormat(Map<String, Object> mapToAdd, String type) {
