@@ -1167,14 +1167,18 @@ public class SwaggerGenerator extends AbstractMojo {
         return javaToSwaggerLinkedHashMap.containsKey(field.getSimpleName());
     }
     private boolean isBlackListed(Class<?> field) {
-        for(String blackListed : blackListedPackages) {
-            if (field.getCanonicalName().contains(blackListed)) {
-                return true;
+        if(blackListedPackages != null) {
+            for(String blackListed : blackListedPackages) {
+                if (field.getCanonicalName().contains(blackListed)) {
+                    return true;
+                }
             }
         }
-        for(String ignoredType : ignoredTypes) {
-            if(field.getCanonicalName().equals(ignoredType)) {
-                return true;
+        if(ignoredTypes != null) {
+            for(String ignoredType : ignoredTypes) {
+                if(field.getCanonicalName().equals(ignoredType)) {
+                    return true;
+                }
             }
         }
         return false;
