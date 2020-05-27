@@ -423,12 +423,7 @@ public class SwaggerGenerator extends AbstractMojo {
             for(String statusCode : returnCodeToDescription.keySet()) {
                 Map<String, Object> statusCodeMap = new LinkedHashMap<>();
                 responses.put(statusCode, statusCodeMap);
-                if(returnCodeToDescription.containsKey(statusCode)) {
-                    statusCodeMap.put("description",returnCodeToDescription.get(statusCode));
-                }
-                else {
-                    statusCodeMap.put("description", "");
-                }
+                statusCodeMap.put("description", returnCodeToDescription.getOrDefault(statusCode, ""));
                 
                 // only if response type is not void do we need a contetnt
                 if(statusCode.contains("200") && actualClass != Void.class && !actualClass.getSimpleName().toLowerCase().equals("void")) 
