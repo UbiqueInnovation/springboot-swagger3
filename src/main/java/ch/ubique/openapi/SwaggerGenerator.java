@@ -84,7 +84,7 @@ public class SwaggerGenerator extends AbstractMojo {
 
 
     private Map<String, Object> getInfoHeader() {
-        Map<String, Object> info = new LinkedHashMap<String, Object>();
+        Map<String, Object> info = new LinkedHashMap<>();
         info.put("version", apiVersion);
         info.put("description", description);
         info.put("title", title);
@@ -92,10 +92,10 @@ public class SwaggerGenerator extends AbstractMojo {
     }
 
     private List<Map<String, Object>> getServers() {
-        List<Map<String, Object>> servers = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> servers = new ArrayList<>();
 
         for (String url : apiUrls) {
-            Map<String, Object> server = new LinkedHashMap<String, Object>();
+            Map<String, Object> server = new LinkedHashMap<>();
             server.put("url", url);
             server.put("description", "");
             servers.add(server);
@@ -103,7 +103,7 @@ public class SwaggerGenerator extends AbstractMojo {
         return servers;
     }
 
-    Map<String, Object> models = new TreeMap<String, Object>();
+    Map<String, Object> models = new TreeMap<>();
 
     private Map<String, Object> getModels() {
         return models;
@@ -113,13 +113,13 @@ public class SwaggerGenerator extends AbstractMojo {
         for (Map<String, Object> model : getModelDefinition("", modelClass)) {
             // we only have one key
             Set<String> keys = model.keySet();
-            List<String> keysList = new ArrayList<String>(keys);
+            List<String> keysList = new ArrayList<>(keys);
 
             models.put(keysList.get(0), model.values().toArray()[0]);
         }
     }
 
-    Map<String, Object> paths = new LinkedHashMap<String, Object>();
+    Map<String, Object> paths = new LinkedHashMap<>();
 
     private Map<String, Object> getPaths() {
 
@@ -127,7 +127,7 @@ public class SwaggerGenerator extends AbstractMojo {
     }
 
     private Map<String, Object> getRequestMethod(Method controllerMethod, RequestMappingWrapper wrapper) {
-        Map<String, Object> method = new LinkedHashMap<String, Object>();
+        Map<String, Object> method = new LinkedHashMap<>();
         method.put("summary", controllerMethod.getName());
         getLog().info("Check if annotation documentation is present");
         getLog().info(Arrays.toString(controllerMethod.getAnnotations()));
@@ -163,7 +163,7 @@ public class SwaggerGenerator extends AbstractMojo {
             }
             nestedReturnValueLayer++;
         }
-        return new Pair<Class<?>, Integer>(innerClass, nestedReturnValueLayer);
+        return new Pair<>(innerClass, nestedReturnValueLayer);
     }
 
     // get the first type which is not generic
@@ -232,7 +232,7 @@ public class SwaggerGenerator extends AbstractMojo {
             // this is not a generic type return the container class
             innerClass = container;
         }
-        return new Pair<Class<?>, Integer>(innerClass, nestedReturnValueLayer);
+        return new Pair<>(innerClass, nestedReturnValueLayer);
     }
     private boolean hasAcceptHeader(List<String> headers) {
         for(String str : headers) {
@@ -243,7 +243,7 @@ public class SwaggerGenerator extends AbstractMojo {
         return false;
     }
     private String[] getMimeTypes(List<String> headers) {
-        List<String> strings = new ArrayList<String>();
+        List<String> strings = new ArrayList<>();
         for(String str : headers) {
             if(str.contains("Accept=")) {
                 String mimes = str.replace("Accept=", "");
@@ -254,10 +254,10 @@ public class SwaggerGenerator extends AbstractMojo {
         return strings.toArray(returnValue);
     }
     private Map<String, Object> getResponseContent(Class<?> returnType,RequestMappingWrapper wrapper, int nestedReturnValueLayer) {
-        LinkedHashMap<String,Object> content = new LinkedHashMap<String,Object>();
+        LinkedHashMap<String,Object> content = new LinkedHashMap<>();
         //default response product is application/json
         String product = "";
-        List<String> headers = new ArrayList<String>();
+        List<String> headers = new ArrayList<>();
         Collections.addAll(headers, wrapper.headers());
 
         if (wrapper.produces().length != 0) {
@@ -276,7 +276,7 @@ public class SwaggerGenerator extends AbstractMojo {
         content.put(product, new LinkedHashMap<String, Object>());
 
         Map<String, Object> contentType = (Map<String, Object>) content.get(product);
-        Map<String, Object> tmpSchema = new LinkedHashMap<String, Object>();
+        Map<String, Object> tmpSchema = new LinkedHashMap<>();
         contentType.put("schema", tmpSchema);
         if (isPrimitive(returnType)) {
             //we have a primitive return type
@@ -319,7 +319,7 @@ public class SwaggerGenerator extends AbstractMojo {
             RequestMappingWrapper wrapper = new RequestMappingWrapper(getRequestMappingForMethod(controllerMethod));
             //the controller method has a dictionar of httpreturncode:text
             DocumentationWrapper docWrapper = null;
-            Map<String, String> returnCodeToDescription = new LinkedHashMap<String,String>();
+            Map<String, String> returnCodeToDescription = new LinkedHashMap<>();
             
             if(controllerMethod.isAnnotationPresent(documentation)) {
                 docWrapper = new DocumentationWrapper(controllerMethod.getAnnotation(documentation));
@@ -350,7 +350,7 @@ public class SwaggerGenerator extends AbstractMojo {
             if(paths.containsKey(path)) {
                 request = (LinkedHashMap<String,Object>)paths.get(path);
             } else {
-                request = new LinkedHashMap<String,Object>();
+                request = new LinkedHashMap<>();
                 paths.put(path, request);
             }
             
@@ -390,7 +390,7 @@ public class SwaggerGenerator extends AbstractMojo {
             if(method.containsKey("responses")) {
                 responses = (LinkedHashMap<String, Object>)method.get("responses");
             } else {
-                responses = new LinkedHashMap<String, Object>();
+                responses = new LinkedHashMap<>();
                 method.put("responses", responses);
             }
             if(returnCodeToDescription.isEmpty()) {
@@ -399,7 +399,7 @@ public class SwaggerGenerator extends AbstractMojo {
                 if(responses.containsKey(statusCode)) {
                     statusCodeMap = (LinkedHashMap<String, Object>)responses.get(statusCode);
                 } else {
-                    statusCodeMap = new LinkedHashMap<String, Object>();
+                    statusCodeMap = new LinkedHashMap<>();
                     responses.put(statusCode, statusCodeMap);
                 }
                 if(returnCodeToDescription.containsKey(statusCode) && !statusCodeMap.containsKey("description")) {
@@ -421,7 +421,7 @@ public class SwaggerGenerator extends AbstractMojo {
                 }
             }
             for(String statusCode : returnCodeToDescription.keySet()) {
-                Map<String, Object> statusCodeMap = new LinkedHashMap<String, Object>();
+                Map<String, Object> statusCodeMap = new LinkedHashMap<>();
                 responses.put(statusCode, statusCodeMap);
                 if(returnCodeToDescription.containsKey(statusCode)) {
                     statusCodeMap.put("description",returnCodeToDescription.get(statusCode));
@@ -450,8 +450,8 @@ public class SwaggerGenerator extends AbstractMojo {
         RequestParamWrapper wrap = new RequestParamWrapper(obj.getAnnotation(requestParam));
 
         String fieldName = (wrap.value().isEmpty() ? obj.getName() : wrap.value());
-        Map<String, Object> param = new LinkedHashMap<String, Object>();
-        Map<String, Object> schema = new LinkedHashMap<String, Object>();
+        Map<String, Object> param = new LinkedHashMap<>();
+        Map<String, Object> schema = new LinkedHashMap<>();
         param.put("name", fieldName);
         param.put("in", "query");
         if(obj.getAnnotation(documentation) != null) {
@@ -495,8 +495,8 @@ public class SwaggerGenerator extends AbstractMojo {
         PathVariableWrapper wrap = new PathVariableWrapper(obj.getAnnotation(pathVariable));
 
         String fieldName = (wrap.value().isEmpty() ? obj.getName() : wrap.value());
-        Map<String, Object> param = new LinkedHashMap<String, Object>();
-        Map<String, Object> schema = new LinkedHashMap<String, Object>();
+        Map<String, Object> param = new LinkedHashMap<>();
+        Map<String, Object> schema = new LinkedHashMap<>();
         param.put("name", fieldName);
         param.put("in", "path");
         if(obj.getAnnotation(documentation) != null) {
@@ -539,8 +539,8 @@ public class SwaggerGenerator extends AbstractMojo {
     private Map<String, Object> getRequestHeader(java.lang.reflect.Parameter obj) {
         RequestHeaderWrapper wrap = new RequestHeaderWrapper(obj.getAnnotation(requestHeader));
         String fieldName = (wrap.value().isEmpty() ? obj.getName() : wrap.value());
-        Map<String, Object> param = new LinkedHashMap<String, Object>();
-        Map<String, Object> schema = new LinkedHashMap<String, Object>();
+        Map<String, Object> param = new LinkedHashMap<>();
+        Map<String, Object> schema = new LinkedHashMap<>();
         param.put("name", fieldName);
         param.put("in", "header");
         if(obj.getAnnotation(documentation) != null) {
@@ -572,8 +572,8 @@ public class SwaggerGenerator extends AbstractMojo {
         // we have a requestbody we need to conform to OpenAPI requestBody
         RequestBodyWrapper wrap = new RequestBodyWrapper(obj.getAnnotation(requestBody));
         String fieldName = obj.getName();
-        Map<String, Object> param = new LinkedHashMap<String, Object>();
-        Map<String, Object> schema = new LinkedHashMap<String, Object>();
+        Map<String, Object> param = new LinkedHashMap<>();
+        Map<String, Object> schema = new LinkedHashMap<>();
         
         param.put("required", wrap.required());
         param.put("content", new LinkedHashMap<String, Object>());
@@ -597,7 +597,7 @@ public class SwaggerGenerator extends AbstractMojo {
 
     //extract paramertes from function
     private List<Map<String, Object>> getParameters(Method controllerMethod, RequestMappingWrapper wrapper, Map<String, Object> methodMap){
-        List<Map<String, Object>> parameters = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> parameters = new ArrayList<>();
         if (controllerMethod.getParameterCount() > 0) {
             for (java.lang.reflect.Parameter obj : controllerMethod.getParameters()) {
                 Map<String, Object> param = null;
@@ -636,7 +636,7 @@ public class SwaggerGenerator extends AbstractMojo {
         logger.info("Get all Classes with a @Controller annotation");
         List<Class<?>> controllerClasses = getControllerClasses();
         // swagger map
-        Map<String, Object> swagger = new LinkedHashMap<String, Object>();
+        Map<String, Object> swagger = new LinkedHashMap<>();
 
         swagger.put("openapi", "3.0.0");
         swagger.put("servers", getServers());
@@ -763,12 +763,12 @@ public class SwaggerGenerator extends AbstractMojo {
     private URLClassLoader loader;
 
     private List<Class<?>> getControllerClasses() throws MojoExecutionException {
-        List<Class<?>> requestClasses = new ArrayList<Class<?>>();
+        List<Class<?>> requestClasses = new ArrayList<>();
         List<String> classpathElements = null;
         try {
             classpathElements = project.getCompileClasspathElements();
            
-            List<URL> projectClasspathList = new ArrayList<URL>();
+            List<URL> projectClasspathList = new ArrayList<>();
             for (String element : classpathElements) {
                 if(element.contains(project.getBasedir().getAbsolutePath())) {
                     //try adding kotlin sourcepath
@@ -841,7 +841,7 @@ public class SwaggerGenerator extends AbstractMojo {
         }
     }
 
-    private List<String> registeredTypes = new ArrayList<String>();
+    private List<String> registeredTypes = new ArrayList<>();
 
 
     private Map<String, Object> extractEnum(Class<?> objectClass) {
@@ -849,7 +849,7 @@ public class SwaggerGenerator extends AbstractMojo {
             Method m = objectClass.getDeclaredMethod("values");
             Object[] o = (Object[]) m.invoke(null);
 
-            Map<String, Object> objDef = new LinkedHashMap<String,Object>();
+            Map<String, Object> objDef = new LinkedHashMap<>();
             
             objDef.put("type", "string");
             
@@ -883,14 +883,14 @@ public class SwaggerGenerator extends AbstractMojo {
         //add all additional found definitions
         for(Map<String, Object>  defi : innerModDef) {
             Set<String> keys = defi.keySet();
-            List<String> keysList = new ArrayList<String>(keys);
+            List<String> keysList = new ArrayList<>(keys);
 
             models.put(keysList.get(0), defi.values().toArray()[0]);
         }
     }
 
     private List<java.lang.reflect.Field> getAllFields(Class<?> theClass) {
-        List<java.lang.reflect.Field> fields = new ArrayList<java.lang.reflect.Field>();
+        List<java.lang.reflect.Field> fields = new ArrayList<>();
         for (Class<?> c = theClass; c != null; c = c.getSuperclass()) {
             fields.addAll(Arrays.asList(c.getDeclaredFields()));
         }
@@ -898,10 +898,10 @@ public class SwaggerGenerator extends AbstractMojo {
     }
 
     private Collection<Map<String,Object>> getModelDefinition(String name, Class<?> objectClass) {
-        ArrayList< Map<String,Object>> definitions = new ArrayList<Map<String,Object>>();
-        Map<String, Object> topLevel = new LinkedHashMap<String,Object>();
+        ArrayList< Map<String,Object>> definitions = new ArrayList<>();
+        Map<String, Object> topLevel = new LinkedHashMap<>();
         
-        Map<String, Object> currentObject = new LinkedHashMap<String,Object>();
+        Map<String, Object> currentObject = new LinkedHashMap<>();
          //we are currently serializing this type so add it to registered types 
          if(registeredTypes.contains(objectClass.getCanonicalName()) ) {
             return definitions;
@@ -947,7 +947,7 @@ public class SwaggerGenerator extends AbstractMojo {
             return definitions;
         }
         
-        List<String> required = new ArrayList<String>();
+        List<String> required = new ArrayList<>();
         
         for(java.lang.reflect.Field field : getAllFields(objectClass)) {
             Class<?> type = field.getType();
@@ -985,7 +985,7 @@ public class SwaggerGenerator extends AbstractMojo {
            
             if(isPrimitive(type)) {
                 //we have a primitive write directyl to map
-                Map<String, Object> innerDef = new LinkedHashMap<String,Object>();
+                Map<String, Object> innerDef = new LinkedHashMap<>();
                 currentObject.put(field.getName(),innerDef);
                 mapPrimitiveTypeAndFormat(innerDef, type.getSimpleName());
                 if(docWrapper != null) {
@@ -996,8 +996,8 @@ public class SwaggerGenerator extends AbstractMojo {
             else if(Collection.class.isAssignableFrom(type) || type.isArray())  {
                 //we have a list
                
-                Map<String, Object> arraydef = new LinkedHashMap<String,Object>();
-                Map<String, String> ref = new LinkedHashMap<String,String>();
+                Map<String, Object> arraydef = new LinkedHashMap<>();
+                Map<String, String> ref = new LinkedHashMap<>();
                 if(field.getGenericType() instanceof ParameterizedType) {
                     ParameterizedType innerType = (ParameterizedType) field.getGenericType();
                     java.lang.reflect.Type innerTypeClass =  innerType.getActualTypeArguments()[0];
@@ -1059,7 +1059,7 @@ public class SwaggerGenerator extends AbstractMojo {
                             if (!isPrimitive(keyClass)) {
                                 logger.error("Swagger definition does not allow complex keys");
                             }
-                            Map<String,Object> objectMap = new LinkedHashMap<String,Object>();
+                            Map<String,Object> objectMap = new LinkedHashMap<>();
                             
                             currentObject.put(field.getName(), objectMap);
                             Class<?> actualClass = loadClass(valuetypeName);
@@ -1068,12 +1068,12 @@ public class SwaggerGenerator extends AbstractMojo {
                                 objectMap.put("description", docWrapper.description());
                                 objectMap.put("example", docWrapper.example());
                             }  
-                            Map<String, Object> addProp = new LinkedHashMap<String,Object>();
+                            Map<String, Object> addProp = new LinkedHashMap<>();
                             objectMap.put("additionalProperties", addProp);
 
                             if(actualClass == null) {
                                 //we have an array
-                                Map<String, Object> lowerLevel = new LinkedHashMap<String,Object>();
+                                Map<String, Object> lowerLevel = new LinkedHashMap<>();
                                 //we have an array 
                                 addProp.put("type", "array");
                                 addProp.put("items", lowerLevel);
@@ -1091,7 +1091,7 @@ public class SwaggerGenerator extends AbstractMojo {
                                     }
                                     else {
                                         lowerLevel.put("type", "array");
-                                        Map<String, Object> tmp = new LinkedHashMap<String,Object>();
+                                        Map<String, Object> tmp = new LinkedHashMap<>();
                                         lowerLevel.put("items", tmp);
                                         lowerLevel = tmp;
 
@@ -1117,7 +1117,7 @@ public class SwaggerGenerator extends AbstractMojo {
            
             else {
                if(isPrimitive(type)) {
-                   Map<String, Object> objDefinition = new LinkedHashMap<String,Object>();
+                   Map<String, Object> objDefinition = new LinkedHashMap<>();
                 currentObject.put(field.getName(),  objDefinition);
                 objDefinition.put("type", javaToSwaggerLinkedHashMap.get(type.getSimpleName()));
                 if(docWrapper != null) {
@@ -1126,7 +1126,7 @@ public class SwaggerGenerator extends AbstractMojo {
                 } 
                 continue;
                }
-               Map<String, Object> objDefinition = new LinkedHashMap<String,Object>();
+               Map<String, Object> objDefinition = new LinkedHashMap<>();
                 currentObject.put(field.getName(),objDefinition );
                 objDefinition.put("$ref", "#/components/schemas/" + type.getCanonicalName()+"");
                 if(docWrapper != null) {
@@ -1144,7 +1144,7 @@ public class SwaggerGenerator extends AbstractMojo {
                 }
             }
         }
-        Map<String, Object> objDef = new LinkedHashMap<String,Object>();
+        Map<String, Object> objDef = new LinkedHashMap<>();
         topLevel.put(objectClass.getCanonicalName(), objDef);
         objDef.put("type", "object");
         if(required.size() > 0) {
@@ -1192,7 +1192,7 @@ public class SwaggerGenerator extends AbstractMojo {
 
     static LinkedHashMap<String, String> javaToSwaggerLinkedHashMap;
     static {
-        javaToSwaggerLinkedHashMap = new LinkedHashMap<String,String>();
+        javaToSwaggerLinkedHashMap = new LinkedHashMap<>();
         javaToSwaggerLinkedHashMap.put("DateTime", "integer" );
         javaToSwaggerLinkedHashMap.put("Date", "integer" );
         javaToSwaggerLinkedHashMap.put("Double", "number" );
@@ -1253,7 +1253,7 @@ public static Method[] getDeclaredMethodsInOrder(Class clazz) {
         }
 
         java.util.Arrays.sort(methods,new ByLength());
-        List<byte[]> blocks = new ArrayList<byte[]>();
+        List<byte[]> blocks = new ArrayList<>();
         int length = 0;
         for (;;) {
             byte[] block = new byte[16*1024];
@@ -1647,7 +1647,7 @@ final class RequestMappingWrapper implements RequestMapping {
 
     public RequestMethod[] method() {
         
-            List<RequestMethod> test = new ArrayList<RequestMethod>();
+            List<RequestMethod> test = new ArrayList<>();
           
             // Object[] returnValue =  (Object[])obj.getClass().getMethod("method", null).invoke(this.obj, null);
         
