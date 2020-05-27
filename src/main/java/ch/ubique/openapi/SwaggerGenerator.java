@@ -95,7 +95,7 @@ public class SwaggerGenerator extends AbstractMojo {
         List<Map<String, Object>> servers = new ArrayList<Map<String, Object>>();
 
         for (String url : apiUrls) {
-            LinkedHashMap<String, Object> server = new LinkedHashMap<String, Object>();
+            Map<String, Object> server = new LinkedHashMap<String, Object>();
             server.put("url", url);
             server.put("description", "");
             servers.add(server);
@@ -634,7 +634,7 @@ public class SwaggerGenerator extends AbstractMojo {
     public void execute() throws MojoExecutionException {
         Log logger = getLog();
         logger.info("Get all Classes with a @Controller annotation");
-        ArrayList<Class<?>> controllerClasses = getControllerClasses();
+        List<Class<?>> controllerClasses = getControllerClasses();
         // swagger map
         Map<String, Object> swagger = new LinkedHashMap<String, Object>();
 
@@ -762,8 +762,8 @@ public class SwaggerGenerator extends AbstractMojo {
 
     private URLClassLoader loader;
 
-    private ArrayList<Class<?>> getControllerClasses() throws MojoExecutionException {
-        ArrayList<Class<?>> requestClasses = new ArrayList<Class<?>>();
+    private List<Class<?>> getControllerClasses() throws MojoExecutionException {
+        List<Class<?>> requestClasses = new ArrayList<Class<?>>();
         List<String> classpathElements = null;
         try {
             classpathElements = project.getCompileClasspathElements();
@@ -841,7 +841,7 @@ public class SwaggerGenerator extends AbstractMojo {
         }
     }
 
-    private ArrayList<String> registeredTypes = new ArrayList<String>();
+    private List<String> registeredTypes = new ArrayList<String>();
 
 
     private Map<String, Object> extractEnum(Class<?> objectClass) {
@@ -1068,7 +1068,7 @@ public class SwaggerGenerator extends AbstractMojo {
                                 objectMap.put("description", docWrapper.description());
                                 objectMap.put("example", docWrapper.example());
                             }  
-                            LinkedHashMap<String, Object> addProp = new LinkedHashMap<String,Object>();
+                            Map<String, Object> addProp = new LinkedHashMap<String,Object>();
                             objectMap.put("additionalProperties", addProp);
 
                             if(actualClass == null) {
@@ -1117,7 +1117,7 @@ public class SwaggerGenerator extends AbstractMojo {
            
             else {
                if(isPrimitive(type)) {
-                   LinkedHashMap<String, Object> objDefinition = new LinkedHashMap<String,Object>();
+                   Map<String, Object> objDefinition = new LinkedHashMap<String,Object>();
                 currentObject.put(field.getName(),  objDefinition);
                 objDefinition.put("type", javaToSwaggerLinkedHashMap.get(type.getSimpleName()));
                 if(docWrapper != null) {
@@ -1126,7 +1126,7 @@ public class SwaggerGenerator extends AbstractMojo {
                 } 
                 continue;
                }
-               LinkedHashMap<String, Object> objDefinition = new LinkedHashMap<String,Object>();
+               Map<String, Object> objDefinition = new LinkedHashMap<String,Object>();
                 currentObject.put(field.getName(),objDefinition );
                 objDefinition.put("$ref", "#/components/schemas/" + type.getCanonicalName()+"");
                 if(docWrapper != null) {
@@ -1253,7 +1253,7 @@ public static Method[] getDeclaredMethodsInOrder(Class clazz) {
         }
 
         java.util.Arrays.sort(methods,new ByLength());
-        ArrayList<byte[]> blocks = new ArrayList<byte[]>();
+        List<byte[]> blocks = new ArrayList<byte[]>();
         int length = 0;
         for (;;) {
             byte[] block = new byte[16*1024];
@@ -1647,7 +1647,7 @@ final class RequestMappingWrapper implements RequestMapping {
 
     public RequestMethod[] method() {
         
-            ArrayList<RequestMethod> test = new ArrayList<RequestMethod>();
+            List<RequestMethod> test = new ArrayList<RequestMethod>();
           
             // Object[] returnValue =  (Object[])obj.getClass().getMethod("method", null).invoke(this.obj, null);
         
