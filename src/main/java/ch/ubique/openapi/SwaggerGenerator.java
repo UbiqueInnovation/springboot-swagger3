@@ -404,7 +404,7 @@ public class SwaggerGenerator extends AbstractMojo {
                 responses.put(statusCode, statusCodeMap);
                 statusCodeMap.put("description", returnCodeToDescription.getOrDefault(statusCode, ""));
                 
-                // only if response type is not void do we need a contetnt
+                // only if response type is not void do we need a content
                 if(statusCode.contains("200") && actualClass != Void.class && !actualClass.getSimpleName().toLowerCase().equals("void")) 
                 {
                     statusCodeMap.put("content", getResponseContent(actualClass, wrapper, nestedReturnValueLayer));
