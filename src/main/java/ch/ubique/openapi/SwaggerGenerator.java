@@ -346,14 +346,8 @@ public class SwaggerGenerator extends AbstractMojo {
             }
 
             // We have a request so create request object
-            Map<String, Object> request = null;
-            if(paths.containsKey(path)) {
-                request = (LinkedHashMap<String,Object>)paths.get(path);
-            } else {
-                request = new LinkedHashMap<>();
-                paths.put(path, request);
-            }
-            
+            Map<String, Object> request = (Map<String, Object>) paths
+                    .computeIfAbsent(path, (x) -> new LinkedHashMap<>());
 
             // get the generic Return Type (e.g ResponseBody<T> List<T> Map<K,V> and so on)
             Type returnType = controllerMethod.getGenericReturnType();
@@ -366,13 +360,8 @@ public class SwaggerGenerator extends AbstractMojo {
                 theMethod = wrapper.method()[0].toString().toLowerCase();
             }
             
-            Map<String, Object> method = null;//getRequestMethod(controllerMethod, wrapper);
-            if(request.containsKey(theMethod)) {
-                method = (LinkedHashMap<String,Object>)request.get(theMethod);
-            } else {
-                method = getRequestMethod(controllerMethod, wrapper);
-                request.put(theMethod, method);
-            }
+            Map<String, Object> method = (Map<String, Object>) request
+                    .computeIfAbsent(theMethod, (x) -> getRequestMethod(controllerMethod, wrapper));
 
             // 0 means the object is directly the return value; 1 means one list, 2 two ....
             int nestedReturnValueLayer = 0;
@@ -386,22 +375,12 @@ public class SwaggerGenerator extends AbstractMojo {
             nestedReturnValueLayer = innerStructure.getValue1();
 
             //Start setting up response
-            Map<String, Object> responses = null;
-            if(method.containsKey("responses")) {
-                responses = (LinkedHashMap<String, Object>)method.get("responses");
-            } else {
-                responses = new LinkedHashMap<>();
-                method.put("responses", responses);
-            }
+            Map<String, Object> responses = (Map<String, Object>) method
+                    .computeIfAbsent("responses", (x) -> new LinkedHashMap<>());
             if(returnCodeToDescription.isEmpty()) {
-                Map<String, Object> statusCodeMap = null;//new LinkedHashMap<String, Object>();
                 String statusCode = "200";
-                if(responses.containsKey(statusCode)) {
-                    statusCodeMap = (LinkedHashMap<String, Object>)responses.get(statusCode);
-                } else {
-                    statusCodeMap = new LinkedHashMap<>();
-                    responses.put(statusCode, statusCodeMap);
-                }
+                Map<String, Object> statusCodeMap = (Map<String, Object>) responses
+                        .computeIfAbsent(statusCode, (x) -> new LinkedHashMap<>());
                 if(returnCodeToDescription.containsKey(statusCode) && !statusCodeMap.containsKey("description")) {
                     statusCodeMap.put("description",returnCodeToDescription.get(statusCode));
                 }
