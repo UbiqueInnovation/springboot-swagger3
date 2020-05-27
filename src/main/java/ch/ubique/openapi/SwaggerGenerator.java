@@ -274,27 +274,21 @@ public class SwaggerGenerator extends AbstractMojo {
             product = "application/json";
         }
         content.put(product, new LinkedHashMap<String, Object>());
-        
+
+        Map<String, Object> contentType = (Map<String, Object>) content.get(product);
+        Map<String, Object> tmpSchema = new LinkedHashMap<String, Object>();
+        contentType.put("schema", tmpSchema);
         if (isPrimitive(returnType)) {
             //we have a primitive return type
-            Map<String, Object> contentType = (Map<String, Object>) content.get(product);
-            contentType.put("schema", new LinkedHashMap<String, Object>());
-            Map<String, Object> tmpSchema = ((Map<String, Object>) contentType.get("schema"));
             mapPrimitiveTypeAndFormat(tmpSchema, returnType.getSimpleName());
         } else if (product.equals("application/octet-stream") || returnType == byte.class) {
             // we have a binary content
-            Map<String, Object> contentType = (Map<String, Object>) content.get(product);
-            contentType.put("schema", new LinkedHashMap<String, Object>());
-            Map<String, Object> tmpSchema = ((Map<String, Object>) contentType.get("schema"));
             tmpSchema.put("type", "string");
             tmpSchema.put("format", "binary");
-        } 
+        }
         else {
             //we have a json response
-            Map<String, Object> contentType = (Map<String, Object>) content.get(product);
-            contentType.put("schema", new LinkedHashMap<String, Object>());
 
-            Map<String, Object> tmpSchema = ((Map<String, Object>) contentType.get("schema"));
             // we have an array
             //if we have an array we need to add respective definitions
             for (int i = 0; i < nestedReturnValueLayer; i++) {
