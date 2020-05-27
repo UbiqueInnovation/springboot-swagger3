@@ -898,7 +898,6 @@ public class SwaggerGenerator extends AbstractMojo {
     }
 
     private Collection<Map<String,Object>> getModelDefinition(String name, Class<?> objectClass) {
-        String def = "";
         ArrayList< Map<String,Object>> definitions = new ArrayList<Map<String,Object>>();
         Map<String, Object> topLevel = new LinkedHashMap<String,Object>();
         
