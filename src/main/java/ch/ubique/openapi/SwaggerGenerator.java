@@ -859,19 +859,7 @@ public class SwaggerGenerator extends AbstractMojo {
             }
             return objDef;
           
-        } catch (SecurityException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
+        } catch (SecurityException | InvocationTargetException | IllegalArgumentException | IllegalAccessException | NoSuchMethodException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -1370,19 +1358,7 @@ final class GetMappingWrapper implements GetMapping {
     private <T> T  invokeMethod(String function) {
         try {
             return (T) obj.getClass().getMethod(function, null).invoke(this.obj, null);
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SecurityException e) {
+        } catch (IllegalAccessException | SecurityException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -1440,19 +1416,7 @@ final class PostMappingWrapper implements PostMapping {
     private <T> T  invokeMethod(String function) {
         try {
             return (T) obj.getClass().getMethod(function, null).invoke(this.obj, null);
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SecurityException e) {
+        } catch (IllegalAccessException | SecurityException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -1510,19 +1474,7 @@ final class PutMappingWrapper implements PutMapping {
     private <T> T  invokeMethod(String function) {
         try {
             return (T) obj.getClass().getMethod(function, null).invoke(this.obj, null);
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SecurityException e) {
+        } catch (IllegalAccessException | SecurityException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -1580,19 +1532,7 @@ final class DeleteMappingWrapper implements DeleteMapping {
     private <T> T  invokeMethod(String function) {
         try {
             return (T) obj.getClass().getMethod(function, null).invoke(this.obj, null);
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SecurityException e) {
+        } catch (IllegalAccessException | SecurityException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -1618,19 +1558,7 @@ final class RequestMappingWrapper implements RequestMapping {
     public String name() {
         try {
             return (String) obj.getClass().getMethod("name", null).invoke(obj, null);
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SecurityException e) {
+        } catch (IllegalAccessException | SecurityException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -1677,19 +1605,7 @@ final class RequestMappingWrapper implements RequestMapping {
     private <T> T  invokeMethod(String function) {
         try {
             return (T) obj.getClass().getMethod(function, null).invoke(this.obj, null);
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SecurityException e) {
+        } catch (IllegalAccessException | SecurityException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
@@ -1702,19 +1618,7 @@ final class RequestMappingWrapper implements RequestMapping {
     <T> T  invokeMethod(String function) {
         try {
             return (T) obj.getClass().getMethod(function, null).invoke(this.obj, null);
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalArgumentException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (SecurityException e) {
+        } catch (IllegalAccessException | SecurityException | NoSuchMethodException | InvocationTargetException | IllegalArgumentException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
