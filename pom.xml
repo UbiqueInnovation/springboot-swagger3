@@ -1,16 +1,17 @@
 <project>
+        <properties>
+                <maven.compiler.target>1.8</maven.compiler.target>
+                <maven.compiler.source>1.8</maven.compiler.source>
+        </properties>
+        
   <modelVersion>4.0.0</modelVersion>
  
   <groupId>ch.ubique.openapi</groupId>
   <artifactId>springboot-swagger-3</artifactId>
-  <version>1.2.5</version>
+  <version>1.2.7</version>
   <packaging>maven-plugin</packaging>
 
-    <properties>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <maven.compiler.source>1.8</maven.compiler.source>
-    </properties>
-
+   
  
   <name>Plugin which uses reflection to generate swagger</name>
   <dependencies>
@@ -66,7 +67,7 @@
       <dependency>
               <groupId>ch.ubique.openapi</groupId>
               <artifactId>doc-annotations</artifactId>
-              <version>0.0.5</version>
+              <version>1.0.1</version>
       </dependency>
  
   </dependencies>
@@ -100,20 +101,36 @@
                                         </execution>
                                 </executions>
                         </plugin>
+                        <plugin>
+                                <groupId>org.apache.maven.plugins</groupId>
+                                <artifactId>maven-source-plugin</artifactId>
+                                <executions>
+                                  <execution>
+                                    <id>attach-sources</id>
+                                    <goals>
+                                      <goal>jar</goal>
+                                    </goals>
+                                  </execution>
+                                </executions>
+                              </plugin>
                 </plugins>
         </build>
         <distributionManagement>
                 <repository>
-                <id>github</id>
-                <name>GitHub Packages</name>
-                <url>https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3</url>
+                   <id>bintray-ubique-oss-springboot-swagger3</id>
+                   <name>ubique-oss-springboot-swagger3</name>
+                   <url>https://api.bintray.com/maven/ubique-oss/springboot-swagger3/springboot-swagger3/;publish=1</url>
                 </repository>
-        </distributionManagement>
-        <repositories>
+             </distributionManagement>
+
+             <repositories>
                 <repository>
-                        <id>github</id>
-                        <name>github</name>
-                        <url>https://maven.pkg.github.com/Ubique-OSS/springboot-swagger3-annotations</url>
-                </repository>
+                        <snapshots>
+                            <enabled>false</enabled>
+                        </snapshots>
+                        <id>bintray-ubique-oss-springboot-swagger3</id>
+                        <name>bintray</name>
+                        <url>https://dl.bintray.com/ubique-oss/springboot-swagger3</url>
+                    </repository>
         </repositories>
 </project>
