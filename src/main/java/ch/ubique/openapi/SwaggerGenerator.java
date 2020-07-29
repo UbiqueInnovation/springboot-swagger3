@@ -337,7 +337,8 @@ public class SwaggerGenerator extends AbstractMojo {
                 getLog().warn("No Documentation annotation found");
             }
             // Add baseUrl to the path
-            String path = wrapper.value()[0];
+            
+            String path = wrapper.value().length > 0? wrapper.value()[0] : wrapper.path().length > 0? wrapper.path()[0] : "";
             getLog().warn(path);
             if (!path.startsWith("/")) {
                 path = baseUrl + "/" + path;
