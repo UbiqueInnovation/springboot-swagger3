@@ -1029,9 +1029,9 @@ public class SwaggerGenerator extends AbstractMojo {
           }
           arraydef.put("type", "array");
           arraydef.put("items", ref);
+          // arrays don't need an example as the example is taken from the examples of the elements
           if (docWrapper != null) {
             arraydef.put("description", docWrapper.description());
-            arraydef.put("example", docWrapper.example());
           }
           currentObject.put(field.getName(), arraydef);
         } else if (field.getGenericType() instanceof GenericArrayType) {
