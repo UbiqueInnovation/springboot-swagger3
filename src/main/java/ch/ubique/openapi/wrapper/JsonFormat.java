@@ -3,6 +3,7 @@ package ch.ubique.openapi.wrapper;
 import com.fasterxml.jackson.annotation.OptBoolean;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 
 public class JsonFormat extends MethodTranslator
         implements com.fasterxml.jackson.annotation.JsonFormat {
@@ -22,6 +23,28 @@ public class JsonFormat extends MethodTranslator
 
     @Override
     public Shape shape() {
+        Object differentShape = invokeMethod("shape");
+        String shapeName = "STRING";
+        try {
+            shapeName =
+                    (String)
+                            differentShape
+                                    .getClass()
+                                    .getMethod("name", null)
+                                    .invoke(differentShape, null);
+        } catch (IllegalAccessException
+                | IllegalArgumentException
+                | InvocationTargetException
+                | NoSuchMethodException
+                | SecurityException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+
+        return Enum.valueOf(Shape.class, shapeName);
+    }
+
+    public Object shapeWrapper() {
         return invokeMethod("shape");
     }
 

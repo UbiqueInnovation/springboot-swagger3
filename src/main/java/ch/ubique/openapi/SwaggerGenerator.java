@@ -1,6 +1,7 @@
 package ch.ubique.openapi;
 
 import ch.ubique.openapi.wrapper.Documentation;
+import ch.ubique.openapi.wrapper.JsonFormat;
 import ch.ubique.openapi.wrapper.Mapping;
 import ch.ubique.openapi.wrapper.PathVariable;
 import ch.ubique.openapi.wrapper.RequestBody;
@@ -777,6 +778,7 @@ public class SwaggerGenerator extends AbstractMojo {
     private Class<? extends Annotation> jsonRawValue;
     private Class<? extends Annotation> pathVariable;
     private Class<? extends Annotation> documentation;
+    private Class<? extends Annotation> jsonFormat;
     public static Class<? extends Annotation> getMapping;
     public static Class<? extends Annotation> postMapping;
 
@@ -855,6 +857,9 @@ public class SwaggerGenerator extends AbstractMojo {
             jsonRawValue =
                     (Class<? extends Annotation>)
                             loader.loadClass("com.fasterxml.jackson.annotation.JsonRawValue");
+            jsonFormat =
+                    (Class<? extends Annotation>)
+                            loader.loadClass("com.fasterxml.jackson.annotation.JsonFormat");
             notNull =
                     (Class<? extends Annotation>)
                             loader.loadClass("javax.validation.constraints.NotNull");
@@ -1032,7 +1037,11 @@ public class SwaggerGenerator extends AbstractMojo {
                 // we have a primitive write directyl to map
                 Map<String, Object> innerDef = new LinkedHashMap<>();
                 currentObject.put(field.getName(), innerDef);
-                mapPrimitiveTypeAndFormat(innerDef, type.getSimpleName());
+                JsonFormat format =
+                        field.isAnnotationPresent(jsonFormat)
+                                ? new JsonFormat(field.getAnnotation(jsonFormat))
+                                : null;
+                mapPrimitiveTypeAndFormat(innerDef, type.getSimpleName(), format, docWrapper);
                 if (docWrapper != null) {
                     innerDef.put("description", docWrapper.description());
                     innerDef.put("example", docWrapper.example());
@@ -1234,6 +1243,47 @@ public class SwaggerGenerator extends AbstractMojo {
 
     private void mapPrimitiveTypeAndFormat(Map<String, Object> mapToAdd, String type) {
         String mappedType = javaToSwaggerLinkedHashMap.get(type);
+        mapToAdd.put("type", mappedType);
+        if (type.equals("double")
+                || type.equals("float")
+                || type.equals("Double")
+                || type.equals("Float")) {
+            mapToAdd.put("format", type.toLowerCase());
+        } else if (type.equals("long") || type.equals("Long")) {
+            mapToAdd.put("format", type.toLowerCase());
+        } else if (type.equals("URL")) {
+            mapToAdd.put("pattern", "(https?|ftps?|file):\\/\\/((.+\\.)+)[A-z]{2,}((\\/.+)*)");
+        }
+    }
+
+    private void mapPrimitiveTypeAndFormat(
+            Map<String, Object> mapToAdd,
+            String type,
+            JsonFormat format,
+            Documentation documentation) {
+        String mappedType = javaToSwaggerLinkedHashMap.get(type);
+        if (format != null) {
+            switch (format.shape()) {
+                case STRING:
+                    mappedType = "string";
+                    if (documentation == null
+                            || (documentation != null
+                                    && (documentation.description() == null
+                                            || documentation.description().isBlank()))) {
+                        mapToAdd.put("pattern", format.pattern());
+                    }
+                    break;
+                case NUMBER_INT:
+                    mappedType = "integer";
+                    break;
+                case NUMBER:
+                case NUMBER_FLOAT:
+                    mappedType = "number";
+                    break;
+                default:
+                    break;
+            }
+        }
         mapToAdd.put("type", mappedType);
         if (type.equals("double")
                 || type.equals("float")
