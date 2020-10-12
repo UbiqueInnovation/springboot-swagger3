@@ -38,6 +38,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.WildcardType;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -164,6 +165,13 @@ public class SwaggerGenerator extends AbstractMojo {
 
                     listType = (ParameterizedType) listType.getActualTypeArguments()[0];
                 } else {
+                    Type innerTmpClass = listType.getActualTypeArguments()[0];
+                    if (innerTmpClass instanceof WildcardType) {
+                        innerClass = Object.class;
+                        getLog().warn("WildcardType don't allow for static Type extraction");
+                        break;
+                    }
+
                     innerClass = ((Class<?>) listType.getActualTypeArguments()[0]);
                     if (innerClass.isArray()) {
                         innerClass = innerClass.getComponentType();
