@@ -593,13 +593,15 @@ public class SwaggerGenerator extends AbstractMojo {
         } else {
             consumes = "application/json";
         }
-        // we have a requestbody we need to conform to OpenAPI requestBody
-        RequestBody wrap = new RequestBody(obj.getAnnotation(requestBody));
         String fieldName = obj.getName();
         Map<String, Object> param = new LinkedHashMap<>();
         Map<String, Object> schema = new LinkedHashMap<>();
+        // we have a requestbody we need to conform to OpenAPI requestBody
+        if (obj.isAnnotationPresent(requestBody)) {
+            RequestBody wrap = new RequestBody(obj.getAnnotation(requestBody));
+            param.put("required", wrap.required());
+        }
 
-        param.put("required", wrap.required());
         param.put("content", new LinkedHashMap<String, Object>());
         if (obj.getAnnotation(documentation) != null) {
             Documentation docWrapper = new Documentation(obj.getAnnotation(documentation));
@@ -645,6 +647,8 @@ public class SwaggerGenerator extends AbstractMojo {
                 }
                 // check for request body
                 else if (obj.getAnnotation(requestBody) != null) {
+                    methodMap.put("requestBody", getRequestBody(obj, wrapper));
+                } else if (obj.getAnnotation(modelAttribute) != null) {
                     methodMap.put("requestBody", getRequestBody(obj, wrapper));
                 }
                 if (param != null) {
@@ -780,6 +784,7 @@ public class SwaggerGenerator extends AbstractMojo {
     private Class<? extends Annotation> requestParam;
     private Class<? extends Annotation> responseBody;
     private Class<? extends Annotation> requestHeader;
+    private Class<? extends Annotation> modelAttribute;
     private Class<? extends Annotation> requestBody;
     private Class<? extends Annotation> jsonIgnore;
     private Class<? extends Annotation> notNull;
@@ -856,6 +861,10 @@ public class SwaggerGenerator extends AbstractMojo {
                     (Class<? extends Annotation>)
                             loader.loadClass(
                                     "org.springframework.web.bind.annotation.RequestHeader");
+            modelAttribute =
+                    (Class<? extends Annotation>)
+                            loader.loadClass(
+                                    "org.springframework.web.bind.annotation.ModelAttribute");
             requestBody =
                     (Class<? extends Annotation>)
                             loader.loadClass("org.springframework.web.bind.annotation.RequestBody");
