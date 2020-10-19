@@ -342,7 +342,8 @@ public class SwaggerGenerator extends AbstractMojo {
                     && !controllerMethod.isAnnotationPresent(getMapping)
                     && !controllerMethod.isAnnotationPresent(postMapping)
                     && !controllerMethod.isAnnotationPresent(putMapping)
-                    && !controllerMethod.isAnnotationPresent(deleteMapping)) continue;
+                    && !controllerMethod.isAnnotationPresent(deleteMapping)
+                    && !controllerMethod.isAnnotationPresent(patchMapping)) continue;
 
             // Get a wrapper arround the Annotation
 
@@ -750,6 +751,10 @@ public class SwaggerGenerator extends AbstractMojo {
             obj = controllerClass.getAnnotation(deleteMapping);
             method = RequestMethod.DELETE;
         }
+        if (controllerClass.isAnnotationPresent(patchMapping)) {
+            obj = controllerClass.getAnnotation(patchMapping);
+            method = RequestMethod.PATCH;
+        }
         logger.error(obj.toString());
         return new Mapping(obj, method);
     }
@@ -789,6 +794,10 @@ public class SwaggerGenerator extends AbstractMojo {
             obj = controllerClass.getAnnotation(deleteMapping);
             method = RequestMethod.DELETE;
         }
+        if (controllerClass.isAnnotationPresent(patchMapping)) {
+            obj = controllerClass.getAnnotation(patchMapping);
+            method = RequestMethod.PATCH;
+        }
         logger.error(obj.toString());
         return new Mapping(obj, method);
     }
@@ -814,6 +823,7 @@ public class SwaggerGenerator extends AbstractMojo {
     public static Class<? extends Annotation> postMapping;
     public static Class<? extends Annotation> putMapping;
     public static Class<? extends Annotation> deleteMapping;
+    public static Class<? extends Annotation> patchMapping;
 
     private Class<?> loadClass(String name) {
         try {
@@ -875,6 +885,9 @@ public class SwaggerGenerator extends AbstractMojo {
             deleteMapping =
                     (Class<? extends Annotation>)
                             loader.loadClass("org.springframework.web.bind.annotation.DeleteMapping");
+            patchMapping =
+                    (Class<? extends Annotation>)
+                            loader.loadClass("org.springframework.web.bind.annotation.PatchMapping");
             requestParam =
                     (Class<? extends Annotation>)
                             loader.loadClass(
