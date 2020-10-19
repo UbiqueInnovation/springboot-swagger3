@@ -340,7 +340,9 @@ public class SwaggerGenerator extends AbstractMojo {
             // skip all methods which do not have a requestMapping annotation
             if (!controllerMethod.isAnnotationPresent(requestMapping)
                     && !controllerMethod.isAnnotationPresent(getMapping)
-                    && !controllerMethod.isAnnotationPresent(postMapping)) continue;
+                    && !controllerMethod.isAnnotationPresent(postMapping)
+                    && !controllerMethod.isAnnotationPresent(putMapping)
+                    && !controllerMethod.isAnnotationPresent(deleteMapping)) continue;
 
             // Get a wrapper arround the Annotation
 
@@ -740,6 +742,14 @@ public class SwaggerGenerator extends AbstractMojo {
             obj = controllerClass.getAnnotation(postMapping);
             method = RequestMethod.POST;
         }
+        if (controllerClass.isAnnotationPresent(putMapping)) {
+            obj = controllerClass.getAnnotation(putMapping);
+            method = RequestMethod.PUT;
+        }
+        if (controllerClass.isAnnotationPresent(deleteMapping)) {
+            obj = controllerClass.getAnnotation(deleteMapping);
+            method = RequestMethod.DELETE;
+        }
         logger.error(obj.toString());
         return new Mapping(obj, method);
     }
@@ -771,6 +781,14 @@ public class SwaggerGenerator extends AbstractMojo {
             obj = controllerClass.getAnnotation(postMapping);
             method = RequestMethod.POST;
         }
+        if (controllerClass.isAnnotationPresent(putMapping)) {
+            obj = controllerClass.getAnnotation(putMapping);
+            method = RequestMethod.PUT;
+        }
+        if (controllerClass.isAnnotationPresent(deleteMapping)) {
+            obj = controllerClass.getAnnotation(deleteMapping);
+            method = RequestMethod.DELETE;
+        }
         logger.error(obj.toString());
         return new Mapping(obj, method);
     }
@@ -794,6 +812,8 @@ public class SwaggerGenerator extends AbstractMojo {
     private Class<? extends Annotation> jsonFormat;
     public static Class<? extends Annotation> getMapping;
     public static Class<? extends Annotation> postMapping;
+    public static Class<? extends Annotation> putMapping;
+    public static Class<? extends Annotation> deleteMapping;
 
     private Class<?> loadClass(String name) {
         try {
@@ -849,6 +869,12 @@ public class SwaggerGenerator extends AbstractMojo {
             postMapping =
                     (Class<? extends Annotation>)
                             loader.loadClass("org.springframework.web.bind.annotation.PostMapping");
+            putMapping =
+                    (Class<? extends Annotation>)
+                            loader.loadClass("org.springframework.web.bind.annotation.PutMapping");
+            deleteMapping =
+                    (Class<? extends Annotation>)
+                            loader.loadClass("org.springframework.web.bind.annotation.DeleteMapping");
             requestParam =
                     (Class<? extends Annotation>)
                             loader.loadClass(
