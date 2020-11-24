@@ -429,6 +429,26 @@ public class SwaggerGenerator extends AbstractMojo {
                     statusCodeMap.put("description", "");
                 }
 
+                if (docWrapper != null) {
+                    if (docWrapper.responseHeaders() != null) {
+                        LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+                        for (var header : docWrapper.responseHeaders()) {
+                            var splits = header.split(":");
+                            if (splits.length <= 0) continue;
+
+                            var headerMap = new LinkedHashMap<String, Object>();
+                            var headerSchema = new LinkedHashMap<String, Object>();
+                            headerSchema.put("type", splits.length >= 3 ? splits[2] : "string");
+                            if (splits.length >= 2) {
+                                headerMap.put("description", splits[1]);
+                            }
+                            headerMap.put("schema", headerSchema);
+                            headers.put(splits[0], headerMap);
+                        }
+                        statusCodeMap.put("headers", headers);
+                    }
+                }
+
                 // only if response type is not void do we need a contetnt
                 if (statusCode.contains("200")
                         && actualClass != Void.class
@@ -450,6 +470,25 @@ public class SwaggerGenerator extends AbstractMojo {
                 responses.put(statusCode, statusCodeMap);
                 statusCodeMap.put(
                         "description", returnCodeToDescription.getOrDefault(statusCode, ""));
+                if (docWrapper != null) {
+                    if (docWrapper.responseHeaders() != null) {
+                        LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
+                        for (var header : docWrapper.responseHeaders()) {
+                            var splits = header.split(":");
+                            if (splits.length <= 0) continue;
+
+                            var headerMap = new LinkedHashMap<String, Object>();
+                            var headerSchema = new LinkedHashMap<String, Object>();
+                            headerSchema.put("type", splits.length >= 3 ? splits[2] : "string");
+                            if (splits.length >= 2) {
+                                headerMap.put("description", splits[1]);
+                            }
+                            headerMap.put("schema", headerSchema);
+                            headers.put(splits[0], headerMap);
+                        }
+                        statusCodeMap.put("headers", headers);
+                    }
+                }
 
                 // only if response type is not void do we need a content
                 if (statusCode.contains("200")
@@ -884,10 +923,12 @@ public class SwaggerGenerator extends AbstractMojo {
                             loader.loadClass("org.springframework.web.bind.annotation.PutMapping");
             deleteMapping =
                     (Class<? extends Annotation>)
-                            loader.loadClass("org.springframework.web.bind.annotation.DeleteMapping");
+                            loader.loadClass(
+                                    "org.springframework.web.bind.annotation.DeleteMapping");
             patchMapping =
                     (Class<? extends Annotation>)
-                            loader.loadClass("org.springframework.web.bind.annotation.PatchMapping");
+                            loader.loadClass(
+                                    "org.springframework.web.bind.annotation.PatchMapping");
             requestParam =
                     (Class<? extends Annotation>)
                             loader.loadClass(
@@ -1243,11 +1284,20 @@ public class SwaggerGenerator extends AbstractMojo {
                     continue;
                 }
                 Map<String, Object> objDefinition = new LinkedHashMap<>();
-                currentObject.put(field.getName(), objDefinition);
+                Collection<Map<String, Object>> allOfWrapper = new ArrayList<>();
+                Map<String, Object> allOf = new LinkedHashMap<>();
+                allOf.put("allOf", allOfWrapper);
+                currentObject.put(field.getName(), allOf);
+
                 objDefinition.put("$ref", "#/components/schemas/" + type.getCanonicalName() + "");
+                allOfWrapper.add(objDefinition);
                 if (docWrapper != null) {
-                    objDefinition.put("description", docWrapper.description());
-                    objDefinition.put("example", docWrapper.example());
+                    var descMap = new LinkedHashMap<String, Object>();
+                    var exampleMap = new LinkedHashMap<String, Object>();
+                    descMap.put("description", docWrapper.description());
+                    exampleMap.put("example", docWrapper.example());
+                    allOfWrapper.add(descMap);
+                    allOfWrapper.add(exampleMap);
                 }
                 // only add types which are not primitives AND from us (prevents weird private
                 // fields from

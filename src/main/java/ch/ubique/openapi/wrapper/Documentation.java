@@ -32,4 +32,8 @@ public final class Documentation extends MethodTranslator
     public Class<?> serializedClass() {
         return invokeMethod("serializedClass");
     }
+
+    public String[] responseHeaders() {
+        return invokeMethod("responseHeaders");
+    }
 }
