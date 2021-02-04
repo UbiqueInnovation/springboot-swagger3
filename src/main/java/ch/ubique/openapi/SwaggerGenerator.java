@@ -432,12 +432,12 @@ public class SwaggerGenerator extends AbstractMojo {
                 if (docWrapper != null) {
                     if (docWrapper.responseHeaders() != null) {
                         LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
-                        for (var header : docWrapper.responseHeaders()) {
-                            var splits = header.split(":");
+                        for (String header : docWrapper.responseHeaders()) {
+                            String[] splits = header.split(":");
                             if (splits.length <= 0) continue;
 
-                            var headerMap = new LinkedHashMap<String, Object>();
-                            var headerSchema = new LinkedHashMap<String, Object>();
+                            LinkedHashMap<String, Object> headerMap = new LinkedHashMap<>();
+                            LinkedHashMap<String, Object> headerSchema = new LinkedHashMap<>();
                             headerSchema.put("type", splits.length >= 3 ? splits[2] : "string");
                             if (splits.length >= 2) {
                                 headerMap.put("description", splits[1]);
@@ -473,12 +473,12 @@ public class SwaggerGenerator extends AbstractMojo {
                 if (docWrapper != null) {
                     if (docWrapper.responseHeaders() != null) {
                         LinkedHashMap<String, Object> headers = new LinkedHashMap<>();
-                        for (var header : docWrapper.responseHeaders()) {
-                            var splits = header.split(":");
+                        for (String header : docWrapper.responseHeaders()) {
+                            String[] splits = header.split(":");
                             if (splits.length <= 0) continue;
 
-                            var headerMap = new LinkedHashMap<String, Object>();
-                            var headerSchema = new LinkedHashMap<String, Object>();
+                            LinkedHashMap<String, Object> headerMap = new LinkedHashMap<>();
+                            LinkedHashMap<String, Object> headerSchema = new LinkedHashMap<>();
                             headerSchema.put("type", splits.length >= 3 ? splits[2] : "string");
                             if (splits.length >= 2) {
                                 headerMap.put("description", splits[1]);
@@ -1292,8 +1292,8 @@ public class SwaggerGenerator extends AbstractMojo {
                 objDefinition.put("$ref", "#/components/schemas/" + type.getCanonicalName() + "");
                 allOfWrapper.add(objDefinition);
                 if (docWrapper != null) {
-                    var descMap = new LinkedHashMap<String, Object>();
-                    var exampleMap = new LinkedHashMap<String, Object>();
+                    LinkedHashMap<String, Object> descMap = new LinkedHashMap<>();
+                    LinkedHashMap<String, Object> exampleMap = new LinkedHashMap<>();
                     descMap.put("description", docWrapper.description());
                     exampleMap.put("example", docWrapper.example());
                     allOfWrapper.add(descMap);
@@ -1375,7 +1375,7 @@ public class SwaggerGenerator extends AbstractMojo {
                     if (documentation == null
                             || (documentation != null
                                     && (documentation.description() == null
-                                            || documentation.description().isBlank()))) {
+                                            || documentation.description().equals("")))) {
                         mapToAdd.put("pattern", format.pattern());
                     }
                     break;
