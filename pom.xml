@@ -191,4 +191,22 @@
                         </plugin>
                 </plugins>
         </build>
+        <distributionManagement>
+                <repository>
+                        <id>bintray-ubique-oss-springboot-swagger3</id>
+                        <name>ubique-oss-springboot-swagger3</name>
+                        <url>https://api.bintray.com/maven/ubique-oss/springboot-swagger3/springboot-swagger3/;publish=1</url>
+                </repository>
+        </distributionManagement>
+
+        <repositories>
+                <repository>
+                        <snapshots>
+                                <enabled>false</enabled>
+                        </snapshots>
+                        <id>bintray-ubique-oss-springboot-swagger3</id>
+                        <name>bintray</name>
+                        <url>https://dl.bintray.com/ubique-oss/springboot-swagger3</url>
+                </repository>
+        </repositories>
 </project>
