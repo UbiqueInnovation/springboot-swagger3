@@ -1450,7 +1450,7 @@ public class SwaggerGenerator extends AbstractMojo {
         }
     }
 
-    /** Grok the bytecode to get the declared order */
+    /* Grok the bytecode to get the declared order */
     public static Method[] getDeclaredMethodsInOrder(Class clazz) {
         Method[] methods = null;
         try {
