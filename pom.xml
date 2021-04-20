@@ -12,7 +12,11 @@
         <description>The Swagger Generator generates an openapi 3.0.0 documentation based on SpringBoot annotations.</description>
         <url>https://github.com/UbiqueInnovation/springboot-swagger3</url>
         <licenses>
-                <license></license>
+                <license>
+                        <name>The MIT License</name>
+                        <url>https://raw.githubusercontent.com/UbiqueInnovation/springboot-swagger3/master/LICENSE</url>
+                        <distribution>repo</distribution>
+                </license>
         </licenses>
         <developers>
                 <developer>
