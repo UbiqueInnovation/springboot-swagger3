@@ -375,7 +375,7 @@ public class SwaggerGenerator extends AbstractMojo {
                             ? wrapper.value()[0]
                             : wrapper.path().length > 0 ? wrapper.path()[0] : "";
             getLog().warn(path);
-            if (!path.startsWith("/")) {
+            if (!baseUrl.isEmpty() && !baseUrl.endsWith("/") && !path.startsWith("/")) {
                 path = baseUrl + "/" + path;
             } else {
                 path = baseUrl + path;
